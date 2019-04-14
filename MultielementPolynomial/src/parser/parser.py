@@ -1,6 +1,7 @@
-from src.parser import nodes
-from src.parser.lexer import Lexer, describe_token
-from src.parser.exceptions import ExpressionSyntaxError
+from MultielementPolynomial.src.parser import nodes
+from MultielementPolynomial.src.parser.nodes import MPExpression
+from MultielementPolynomial.src.parser.lexer import Lexer, describe_token
+from MultielementPolynomial.src.parser.exceptions import ExpressionSyntaxError
 
 _math_nodes = {
     'add': nodes.Add,
@@ -22,10 +23,13 @@ class Parser(object):
         """
         if pos is None:
             pos = self.stream.current.pos
-        raise ExpressionSyntaxError(msg + " at pos " + pos)
+        raise ExpressionSyntaxError(f"{msg} at pos {pos}")
 
     def parse(self):
-        return self.parse_math1()
+        result = self.parse_math1()
+        if self.stream.current.type != 'eof':
+            self.fail("unexpected '%s'" % describe_token(self.stream.current))
+        return MPExpression(result)
 
     def parse_math1(self):
         left = self.parse_math2()
@@ -58,32 +62,40 @@ class Parser(object):
         token = self.stream.current
         token_type = token.type
         if token_type == 'sub':
-            next(self.stream)
-            num = self.stream.next_if("number")
-            if num:
-                node = nodes.Number(-num.value)
-            else:
-                var = self.stream.next_if("var")
-                if var:
-                    coef = nodes.Number(-1)
-                    var = nodes.Variable(var.value)
-                    node = nodes.Mul(coef, var)
-                else:
-                    self.fail("unexpected '%s'" % describe_token(token))
+            next(self.stream)  # 吞掉负号
 
+            if self.stream.current.test("number"):
+                node = nodes.Number(-self.stream.current.value)
+                next(self.stream)
+            elif self.stream.current.test("var"):
+                # 对于变元前的负号，将转换为-1数字，例如 -x 将解析为 -1*x
+                num = nodes.Number(-1)
+                node = nodes.Mul(num, nodes.Variable(self.stream.current.value))
+                next(self.stream)
+            elif self.stream.current.test("lparen"):
+                # 对于括弧前的负号，将转换为-1数字，例如 -(1-2) 将解析为 -1*(1-2)
+                next(self.stream)  # 吞掉左括弧
+                expr_node = self.parse_math1()
+                node = nodes.Mul(nodes.Number(-1), expr_node)
+                self.stream.expect("rparen")
+            else:
+                self.fail("unexpected '%s'" % describe_token(token))
         elif token_type == 'add':
             next(self.stream)
-            num = self.stream.next_if("number")
-            if num:
-                node = nodes.Number(num.value)
+
+            if self.stream.current.test("number"):
+                node = nodes.Number(self.stream.current.value)
+                next(self.stream)
+            elif self.stream.current.test("var"):
+                node = nodes.Variable(self.stream.current.value)
+                next(self.stream)
+            elif self.stream.current.test("lparen"):
+                next(self.stream)  # 吞掉左括弧
+                expr_node = self.parse_math1()
+                node = expr_node
+                self.stream.expect("rparen")
             else:
-                var = self.stream.next_if("var")
-                if var:
-                    coef = nodes.Number(1)
-                    var = nodes.Variable(var.value)
-                    node = nodes.Mul(coef, var)
-                else:
-                    self.fail("unexpected '%s'" % describe_token(token))
+                self.fail("unexpected '%s'" % describe_token(token))
         else:
             node = self.parse_primary()
 
@@ -99,7 +111,7 @@ class Parser(object):
             next(self.stream)
         elif token.type == 'lparen':
             next(self.stream)
-            node = self.parse()
+            node = self.parse_math1()
             self.stream.expect('rparen')
         else:
             self.fail("unexpected '%s'" % describe_token(token), token.pos)
@@ -108,5 +120,5 @@ class Parser(object):
 
 
 if __name__ == '__main__':
-    p = Parser("2* x * y ^ 2 - (x + 2)")
+    p = Parser("123 * 12 * 456 + 123")
     print(p.parse())

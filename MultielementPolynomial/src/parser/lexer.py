@@ -2,7 +2,7 @@ import re
 from collections import deque
 from operator import itemgetter
 import sys
-from src.parser.exceptions import ExpressionSyntaxError
+from MultielementPolynomial.src.parser.exceptions import ExpressionSyntaxError
 
 TOKEN_INITIAL = sys.intern("initial")
 TOKEN_NUMBER = sys.intern("number")
@@ -35,13 +35,14 @@ tok_regex = re.compile('|'.join('(?P<%s>%s)' % pair for pair in [
 
 
 def describe_token(token):
-    if token.type == "var":
+    if token.test_any("var", "add", "sub", "mul", "pow"):
         return token.value
     return token.type
 
 
 def describe_token_expr(expr):
     if ':' in expr:
+
         type, value = expr.split(':', 1)
         if type == "var":
             return value
@@ -253,6 +254,7 @@ class Lexer(object):
             yield kind, value, pos
         if balancing_stack:
             raise ExpressionSyntaxError(f'expected {balancing_stack[0]!r} on pos {pos}')
+
 
 if __name__ == '__main__':
     p = Lexer()
