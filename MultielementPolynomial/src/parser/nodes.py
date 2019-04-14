@@ -148,6 +148,9 @@ class MPExpression(object):
                 for item in result.items[1:]:
                     val += item
                 self._value = val
+        # 如果计算结果是Item，再包装成MultielementPolynomial
+        if isinstance(self._value, Item):
+            self._value = MultielementPolynomial(self._value)
 
     @property
     def vars(self):
@@ -160,6 +163,9 @@ class MPExpression(object):
 class MultielementPolynomial(Node):
     def __init__(self, *items):
         self.items = items
+
+    def __iter__(self):
+        return iter(self.items)
 
     def __str__(self):
         buffer = []
