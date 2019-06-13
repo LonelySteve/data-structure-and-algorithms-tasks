@@ -1,4 +1,4 @@
-from binary_tree import BinaryTree
+from binary_tree import BinaryTree, HuffmanTree
 
 
 class TestBinaryTree(object):
@@ -124,3 +124,47 @@ class TestBinaryTree(object):
         assert t.get_node_sibling(lambda node: node.value == "5") is None
         t = self.get_example_tree_2()
         assert t.get_node_sibling(lambda node: node.value == "1") is None
+
+
+class TestHuffmanTree(object):
+    def get_example_tree_0(self):
+        def_dict = {
+            "A": 1,
+            "B": 2,
+            "C": 3,
+            "D": 4,
+            "E": 5,
+        }
+        return HuffmanTree.create(def_dict)
+
+    def get_example_tree_1(self):
+        def_dict = {
+            "E": 1,
+            "D": 2,
+            "C": 3,
+            "B": 4,
+            "A": 5,
+        }
+        return HuffmanTree.create(def_dict)
+
+    def get_example_tree_2(self):
+        def_dict = {}
+        return HuffmanTree.create(def_dict)
+
+    def test_create(self):
+        t = self.get_example_tree_0()
+        assert t.root.value == 15
+        assert t.root.left_node.value == 6
+        assert t.root.right_node.value == 9
+        self.get_example_tree_1()
+        self.get_example_tree_2()
+
+    def test_dump_code_dict(self):
+        t = self.get_example_tree_0()
+        assert t.dump_code_dict() == {
+            "A": [0, 1, 0],
+            "B": [0, 1, 1],
+            "C": [0, 0],
+            "D": [1, 0],
+            "E": [1, 1]
+        }

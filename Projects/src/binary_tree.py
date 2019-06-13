@@ -49,60 +49,63 @@ class BinaryTreeNode(object):
         node.right_node = src_node
         self.left_node = node
 
-    def pre_order_traverse(self, visit_callback):
+    def pre_order_traverse(self, visit_callback, *extra_info):
         """
         使用指定的遍历回调函数前序遍历当前结点
 
         :param visit_callback:
+        :param extra_info:
         :return:
         """
-        result = visit_callback(self)
+        result = visit_callback(self, *extra_info)
         if result:
             return result
         if self.left_node is not None:
-            result = self.left_node.pre_order_traverse(visit_callback)
+            result = self.left_node.pre_order_traverse(visit_callback, *extra_info)
             if result:
                 return result
         if self.right_node is not None:
-            result = self.right_node.pre_order_traverse(visit_callback)
+            result = self.right_node.pre_order_traverse(visit_callback, *extra_info)
             if result:
                 return result
 
-    def in_order_traverse(self, visit_callback):
+    def in_order_traverse(self, visit_callback, *extra_info):
         """
         使用指定的遍历回调函数中序遍历当前结点
 
         :param visit_callback:
+        :param extra_info:
         :return:
         """
         if self.left_node is not None:
-            result = self.left_node.in_order_traverse(visit_callback)
+            result = self.left_node.in_order_traverse(visit_callback, *extra_info)
             if result:
                 return result
-        result = visit_callback(self)
+        result = visit_callback(self, *extra_info)
         if result:
             return result
         if self.right_node is not None:
-            result = self.right_node.in_order_traverse(visit_callback)
+            result = self.right_node.in_order_traverse(visit_callback, *extra_info)
             if result:
                 return result
 
-    def post_order_traverse(self, visit_callback):
+    def post_order_traverse(self, visit_callback, *extra_info):
         """
         使用指定的遍历回调函数后序遍历当前结点
 
         :param visit_callback:
+        :param extra_info:
         :return:
         """
         if self.left_node is not None:
-            result = self.left_node.post_order_traverse(visit_callback)
+            result = self.left_node.post_order_traverse(visit_callback, *extra_info)
             if result:
                 return result
         if self.right_node is not None:
-            result = self.right_node.post_order_traverse(visit_callback)
+            result = self.right_node.post_order_traverse(visit_callback, *extra_info)
             if result:
                 return result
-        result = visit_callback(self)
+        result = visit_callback(self, *extra_info)
         if result:
             return result
 
@@ -237,32 +240,122 @@ class BinaryTree:
 
         return bool(self.root.pre_order_traverse(exist_callback))
 
-    def pre_order_traverse(self, visit_callback):
+    def pre_order_traverse(self, visit_callback, *extra_info):
         """
         使用指定访问回调函数对当前树的结点进行先序遍历访问
 
         :param visit_callback: 访问器
+        :param extra_info: 给访问函数的额外参数
         :return: None
         """
         if self.root is not None:
-            self.root.pre_order_traverse(visit_callback)
+            self.root.pre_order_traverse(visit_callback, *extra_info)
 
-    def in_order_traverse(self, visit_callback):
+    def in_order_traverse(self, visit_callback, *extra_info):
         """
         使用指定访问回调函数对当前树的结点进行中序遍历访问
 
         :param visit_callback:
+        :param extra_info: 给访问函数的额外参数
         :return:
         """
         if self.root is not None:
-            self.root.in_order_traverse(visit_callback)
+            self.root.in_order_traverse(visit_callback, *extra_info)
 
-    def post_order_traverse(self, visit_callback):
+    def post_order_traverse(self, visit_callback, *extra_info):
         """
         使用指定访问回调函数对当前树的结点进行后序遍历访问
 
         :param visit_callback:
+        :param extra_info: 给访问函数的额外参数
         :return:
         """
         if self.root is not None:
-            self.root.post_order_traverse(visit_callback)
+            self.root.post_order_traverse(visit_callback, *extra_info)
+
+
+class HuffmanTreeNode(BinaryTreeNode):
+    """
+    哈夫曼树结点
+    与一般的二叉树结点不同的是:
+    1. 这个结点可以进行小于比较，值只能为整数
+    2. 可以进行加法操作，得到一个新的哈夫曼树结点，其左孩子为原加法中值较小的一方，右孩子为值较大的一方，新结点的值为原两个结点值之和
+    """
+
+    def __init__(self, name=None, left_node=None, right_node=None, value=None):
+        super().__init__(left_node, right_node)
+        if not isinstance(value, int):
+            raise TypeError
+        self.name = name
+        self.value = value
+        self.child_status = -1
+
+    def __repr__(self):
+        return f"<HuffmanTreeNode name='{self.name}' value='{self.value}'>"
+
+    def __lt__(self, other):
+        return self.value < other.value
+
+    def __add__(self, other):
+        if isinstance(other, HuffmanTreeNode):
+            min_node = min(self, other)
+            sum_val = self.value + other.value
+            if min_node is self:
+                self.child_status = 0
+                other.child_status = 1
+                return HuffmanTreeNode(left_node=self, right_node=other, value=sum_val)
+            else:
+                self.child_status = 1
+                other.child_status = 0
+                return HuffmanTreeNode(left_node=other, right_node=self, value=sum_val)
+        raise NotImplementedError
+
+    def pre_order_traverse(self, visit_callback, *extra_info):
+        """
+        使用指定的遍历回调函数前序遍历当前结点
+
+        :param visit_callback:
+        :param extra_info:
+        :return:
+        """
+        # 拷贝当前递归层次的编码信息，这样，即使下一层某个分支对编码信息做了修改，也不会将影响传入到另一分支
+        extra_info = extra_info[0].copy()
+        super().pre_order_traverse(visit_callback, extra_info)
+
+
+class HuffmanTree(BinaryTree):
+    """
+    哈夫曼树
+    """
+
+    @staticmethod
+    def create(definition_dict):
+        """根据前序字符串二叉树定义创建哈夫曼树"""
+        node_list = [HuffmanTreeNode(name=name, value=val) for name, val in definition_dict.items() if
+                     name != HuffmanTree.VOID_NODE_PLACEHOLDER]  # 忽略空树占位符
+
+        while len(node_list) >= 2:
+            min_node_1 = node_list.pop() if len(node_list) == 1 else node_list.pop(node_list.index(min(*node_list)))
+            min_node_2 = node_list.pop() if len(node_list) == 1 else node_list.pop(node_list.index(min(*node_list)))
+
+            node_list.append(min_node_1 + min_node_2)
+
+        # 最终正常情况下，应该还剩下一个结点
+        if node_list:
+            return HuffmanTree(node_list.pop())
+        # 还有一种情况，就是原来列表中就没有任何结点，此时返回空树
+        return HuffmanTree()
+
+    def dump_code_dict(self):
+        """获取当前哈夫曼树的哈夫曼编码"""
+        code_dict = {}
+
+        def visit_callback(node, *extra_info):
+            if node.child_status == -1:  # 头结点
+                return
+            extra_info[0].append(node.child_status)
+            if node.name is not None:  # 如果名称不为空，则表明该结点是叶子节点
+                code_dict[node.name] = extra_info[0].copy()
+
+        self.pre_order_traverse(visit_callback, [])
+        return code_dict
