@@ -3,7 +3,8 @@ from binary_tree import BinaryTree
 
 class TestBinaryTree(object):
     def get_example_tree_0(self):
-        t = BinaryTree.create("123$$4$$5$$")
+        th = BinaryTree.VOID_NODE_PLACEHOLDER
+        t = BinaryTree.create(f"123{th}{th}4{th}{th}5{th}{th}")
         return t
 
     def get_example_tree_1(self):

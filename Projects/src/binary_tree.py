@@ -129,6 +129,8 @@ class BinaryTree:
     """
     二叉树
     """
+    # 空结点占位符
+    VOID_NODE_PLACEHOLDER = "$"
 
     def __init__(self, root):
         """实例化新的树实例"""
@@ -147,7 +149,7 @@ class BinaryTree:
 
             ch = char_list.pop(0)
 
-            if ch == '$':
+            if ch == BinaryTree.VOID_NODE_PLACEHOLDER:
                 return None
             else:
                 new_node = BinaryTreeNode()
