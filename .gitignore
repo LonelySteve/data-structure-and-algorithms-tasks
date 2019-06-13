@@ -351,3 +351,6 @@ MigrationBackup/
 
 # .pytest_cache
 .pytest_cache/
+
+# venv
+venv/
