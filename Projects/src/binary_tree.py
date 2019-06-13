@@ -132,7 +132,7 @@ class BinaryTree:
     # 空结点占位符
     VOID_NODE_PLACEHOLDER = "$"
 
-    def __init__(self, root):
+    def __init__(self, root=None):
         """实例化新的树实例"""
         self.root = root
 
