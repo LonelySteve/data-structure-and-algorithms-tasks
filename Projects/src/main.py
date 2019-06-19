@@ -202,7 +202,34 @@ class GraphController(object):
                     break
                 except Exception as ex:
                     print("错误：" + str(ex))
+        print("================================================")
+        print(f"创建的新{cls_name}的名称为：{name}")
+        print(f"该{cls_name}的邻接矩阵为：")
+        self._print_adjacency_matrix(g)
         flash_message("创建完成...")
+
+    def _print_adjacency_matrix(self, g):
+        # 首先遍历邻接矩阵每一个元素，取最大值
+        max_elem = 0
+        for row in g.adjacency_matrix:
+            for elem in row:
+                if elem > max_elem:
+                    max_elem = elem
+
+        max_elem_len = len(str(max_elem))
+        # 打印邻接矩阵
+        for row in g.adjacency_matrix:
+            for elem in row:
+                if elem <= g.DEFAULT_UNREACHABLE_MAX_VALUE:
+                    # 对于网应当打印出无限符号
+                    if isinstance(g, (UndirectedNetwork, DirectedNetwork)):
+                        print(f"{'∞':>{max_elem_len + 1}}", end='')  # 右对齐，宽度为最大元素的字面值长度加1
+                    else:
+                        print(f"{g.DEFAULT_UNREACHABLE_MAX_VALUE:>{max_elem_len + 1}}", end='')  # 右对齐，宽度为最大元素的字面值长度加1
+
+                else:
+                    print(f"{elem:>{max_elem_len + 1}}", end='')  # 右对齐，宽度为最大元素的字面值长度加1
+            print()  # 换行
 
     def _select_graph(self, cls_s, cls_names):
         available_graphs = [g_ for g_ in self.graphs.items() if isinstance(g_[1], cls_s)]
@@ -270,6 +297,8 @@ class GraphController(object):
         print("该最小生成树的邻接表：")
         for v, adj_vs in tree.adjacency_dict.items():
             print(f"{v.name}: {','.join([v.name for v in adj_vs])}")
+        print("该最小生成树的邻接矩阵：")
+        self._print_adjacency_matrix(tree)
 
     def find_shortest_paths(self):
         g = self._select_graph((UndirectedGraph, DirectedGraph, DirectedNetwork, UndirectedNetwork),

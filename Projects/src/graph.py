@@ -121,6 +121,10 @@ class UndirectedEdge(Edge):
 class Graph(object):
     """图"""
     EDGE_CLS = None
+    # 默认表示可达的邻接矩阵元素值
+    DEFAULT_REACHABLE_VALUE = 1
+    # 默认表示不可达的邻接矩阵最大元素值
+    DEFAULT_UNREACHABLE_MAX_VALUE = 0
 
     def __init__(self, *vertexes):
         self.vertexes = []
@@ -169,6 +173,28 @@ class Graph(object):
     def extend_vertexes(self, *vertexes):
         for v in vertexes:
             self.add_vertex(v)
+
+    @property
+    def adjacency_matrix(self):
+        """获取邻接矩阵"""
+        # 初始化邻接矩阵，填充不可达的值
+        temp_adjacency_matrix = [[self.DEFAULT_UNREACHABLE_MAX_VALUE for _ in range(len(self.vertexes))] for _ in
+                                 range(len(self.vertexes))]
+
+        adjacency_dict = self.adjacency_dict
+        for i, vertex in enumerate(self.vertexes):
+            for adj_vertex in adjacency_dict[vertex]:
+                j = self.vertexes.index(adj_vertex)
+                temp_adjacency_matrix[i][j] = self.DEFAULT_REACHABLE_VALUE
+                try:
+                    # 如果找到了两个顶点的边，且边有权值，则重新赋值为该权值
+                    edge = self.find_edge(vertex, adj_vertex)
+                    if edge.weight is not None:
+                        temp_adjacency_matrix[i][j] = edge.weight
+                except StopIteration:
+                    pass
+
+        return temp_adjacency_matrix
 
     @property
     def adjacency_dict(self):
@@ -416,8 +442,34 @@ class UndirectedGraph(Graph):
 class DirectedNetwork(DirectedBase):
     """有向网"""
     EDGE_CLS = DirectedEdge
+    # 默认表示不可达的邻接矩阵最大元素值
+    DEFAULT_UNREACHABLE_MAX_VALUE = -1
+
+    def add_new_edge(self, from_vertex_name, to_vertex_name, weight=None):
+        # 对于边权小于默认表示不可达的邻接矩阵最大元素值的，禁止该边的添加
+        if weight and weight <= self.DEFAULT_UNREACHABLE_MAX_VALUE:
+            raise exceptions.EdgeWeightError(f"有向网的边权不允许小于或等于{self.DEFAULT_UNREACHABLE_MAX_VALUE}")
+        super().add_new_edge(from_vertex_name, to_vertex_name, weight)
+
+    def add_edge(self, edge):
+        if edge.weight and edge.weight <= self.DEFAULT_UNREACHABLE_MAX_VALUE:
+            raise exceptions.EdgeWeightError(f"有向网的边权不允许小于或等于{self.DEFAULT_UNREACHABLE_MAX_VALUE}")
+        super().add_edge(edge)
 
 
 class UndirectedNetwork(Graph):
     """无向网"""
     EDGE_CLS = UndirectedEdge
+    # 默认表示不可达的邻接矩阵最大元素值
+    DEFAULT_UNREACHABLE_MAX_VALUE = -1
+
+    def add_new_edge(self, from_vertex_name, to_vertex_name, weight=None):
+        # 对于边权小于默认表示不可达的邻接矩阵最大元素值的，禁止该边的添加
+        if weight and weight <= self.DEFAULT_UNREACHABLE_MAX_VALUE:
+            raise exceptions.EdgeWeightError(f"无向网的边权不允许小于或等于{self.DEFAULT_UNREACHABLE_MAX_VALUE}")
+        super().add_new_edge(from_vertex_name, to_vertex_name, weight)
+
+    def add_edge(self, edge):
+        if edge.weight and edge.weight <= self.DEFAULT_UNREACHABLE_MAX_VALUE:
+            raise exceptions.EdgeWeightError(f"无向网的边权不允许小于或等于{self.DEFAULT_UNREACHABLE_MAX_VALUE}")
+        super().add_edge(edge)

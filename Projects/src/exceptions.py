@@ -32,3 +32,7 @@ class VertexNotExistError(VertexError):
 
 class EdgeTypeError(Exception):
     """边类型错误"""
+
+
+class EdgeWeightError(Exception):
+    """边权错误"""

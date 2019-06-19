@@ -22,6 +22,19 @@ class TestUndirectedGraph(object):
         with pytest.raises(exceptions.VertexNotExistError):
             ug.add_new_edge("C", "E")
 
+    def test_adjacency_matrix(self):
+        ug = UndirectedGraph("A", "B", "C", "D")
+        ug.add_new_edge("A", "B")
+        ug.add_new_edge("B", "C")
+        ug.add_new_edge("C", "D")
+
+        assert ug.adjacency_matrix == [
+            [0, 1, 0, 0],
+            [1, 0, 1, 0],
+            [0, 1, 0, 1],
+            [0, 0, 1, 0]
+        ]
+
     def test_traverse(self):
         vertexes_names = []
 
@@ -73,6 +86,19 @@ class TestDirectedGraph(object):
 
         with pytest.raises(exceptions.VertexNotExistError):
             dg.add_new_edge("E", "B")
+
+    def test_adjacency_matrix(self):
+        dg = DirectedGraph("A", "B", "C", "D")
+        dg.add_new_edge("A", "B")
+        dg.add_new_edge("B", "C")
+        dg.add_new_edge("C", "D")
+
+        assert dg.adjacency_matrix == [
+            [0, 1, 0, 0],
+            [0, 0, 1, 0],
+            [0, 0, 0, 1],
+            [0, 0, 0, 0]
+        ]
 
     def test_traverse(self):
         vertexes_names = []
@@ -138,6 +164,19 @@ class TestUndirectedNetwork(object):
 
         with pytest.raises(exceptions.VertexNotExistError):
             un.add_new_edge("E", "B")
+
+    def test_adjacency_matrix(self):
+        un = UndirectedNetwork("A", "B", "C", "D")
+        un.add_new_edge("A", "B", 2)
+        un.add_new_edge("B", "C", 3)
+        un.add_new_edge("C", "D", 4)
+
+        assert un.adjacency_matrix == [
+            [-1, 2, -1, -1],
+            [2, -1, 3, -1],
+            [-1, 3, -1, 4],
+            [-1, -1, 4, -1]
+        ]
 
     def test_traverse(self):
         vertexes_names = []
@@ -229,6 +268,19 @@ class TestDirectedNetwork(object):
 
         with pytest.raises(exceptions.VertexNotExistError):
             dn.add_new_edge("E", "B")
+
+    def test_adjacency_matrix(self):
+        un = DirectedNetwork("A", "B", "C", "D")
+        un.add_new_edge("A", "B", 2)
+        un.add_new_edge("B", "C", 3)
+        un.add_new_edge("C", "D", 4)
+
+        assert un.adjacency_matrix == [
+            [-1, 2, -1, -1],
+            [-1, -1, 3, -1],
+            [-1, -1, -1, 4],
+            [-1, -1, -1, -1]
+        ]
 
     def test_topological_sort(self):
         dn = DirectedNetwork()
