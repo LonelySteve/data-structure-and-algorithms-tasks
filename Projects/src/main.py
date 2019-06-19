@@ -16,6 +16,7 @@ def flash_message(message=None, keep_time=3):
 
 def option_catcher(option_handle_callback):
     i = input("请选择：")
+    no = None
     try:
         no = int(i)
         try:
@@ -48,17 +49,32 @@ class BinaryTreeController(object):
         if self.binary_tree is None:
             raise Exception("请先构建二叉树！")
 
+        values = []
+
         def visit_callback(node):
-            print(node.value, end="")
+            values.append(node.value)
+
+        def show_value_and_clear(prefix):
+            print(prefix + "".join(values))
+            values.clear()
 
         def pre_order_traverse():
             self.binary_tree.pre_order_traverse(visit_callback)
+            os.system("cls")
+            show_value_and_clear("前序遍历结果：")
+            time.sleep(3)
 
         def in_order_traverse():
             self.binary_tree.in_order_traverse(visit_callback)
+            os.system("cls")
+            show_value_and_clear("中序遍历结果：")
+            time.sleep(3)
 
         def post_order_traverse():
             self.binary_tree.post_order_traverse(visit_callback)
+            os.system("cls")
+            show_value_and_clear("后序遍历结果：")
+            time.sleep(3)
 
         options = {
             1: pre_order_traverse,
@@ -109,7 +125,8 @@ class BinaryTreeController(object):
             flash_message(f"未能找到{name}的兄弟")
 
     def huffman_coding(self):
-        not_encoding_chars = list(input("请输入一段待编码的字符串："))
+        not_encoding_string = input("请输入一段待编码的字符串：")
+        not_encoding_chars = list(not_encoding_string)
         with_weight_chars = {}
         for char in set(not_encoding_chars):
             while True:
@@ -119,7 +136,7 @@ class BinaryTreeController(object):
                     break
                 except ValueError:
                     print("请输入正确的值！")
-
+        flash_message(keep_time=0)
         t = HuffmanTree.create(with_weight_chars)
         code_dict = t.dump_code_dict()
         temp_stack = []
@@ -129,7 +146,8 @@ class BinaryTreeController(object):
             print(f"{char_encoding_info[0]}的编码是{encoding}")
 
         print()  # 空行
-        flash_message(f"该字符串的哈夫曼编码为：{' '.join(temp_stack)}")
+        print(f"该字符串'{not_encoding_string}'的哈夫曼编码为：{' '.join(temp_stack)}")
+        flash_message()
 
 
 class GraphController(object):
