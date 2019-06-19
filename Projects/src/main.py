@@ -4,23 +4,28 @@ from binary_tree import BinaryTree, HuffmanTree
 from graph import DirectedGraph, UndirectedGraph, DirectedNetwork, UndirectedNetwork
 
 
-def flash_message(message, keep_time=3):
-    i = os.system("cls")
-    print(message)
-    time.sleep(keep_time)
+def flash_message(message=None, keep_time=3):
+    if message:  # 如果消息有效则先清屏再打印消息，否则先等待，再清屏
+        i = os.system("cls")
+        print(message)
+        time.sleep(keep_time)
+    else:
+        time.sleep(keep_time)
+        i = os.system("cls")
 
 
 def option_catcher(option_handle_callback):
     i = input("请选择：")
-    no = int(i)
     try:
-        return option_handle_callback(no)
+        no = int(i)
+        try:
+            return option_handle_callback(no)
+        except Exception as ex:
+            flash_message(str(ex))
     except KeyError:
         flash_message(f"不存在的选项 {no} 请重新选择！")
     except ValueError:
         flash_message(f"无法转换为数字的字符串：{i}")
-    except Exception as ex:
-        flash_message(str(ex))
 
 
 class BinaryTreeController(object):
@@ -206,7 +211,7 @@ class GraphController(object):
         print(f"创建的新{cls_name}的名称为：{name}")
         print(f"该{cls_name}的邻接矩阵为：")
         self._print_adjacency_matrix(g)
-        flash_message("创建完成...")
+        flash_message()
 
     def _print_adjacency_matrix(self, g):
         # 首先遍历邻接矩阵每一个元素，取最大值
@@ -272,17 +277,24 @@ class GraphController(object):
         g = self._select_graph((UndirectedGraph, DirectedGraph, DirectedNetwork, UndirectedNetwork),
                                ("无向图", "有向图", "有向网", "无向网"))
 
+        values = []
+
         def visit_callback(vertex):
-            print(vertex.name, end="")
+            values.append(vertex.name)
+
+        def show_value_and_clear(prefix):
+            print(prefix + "".join(values))
+            values.clear()
 
         start_vertex_name = input("请输入遍历起始点的名称：")
 
-        print("BFS 遍历结果：", end="")
+        os.system("cls")
         g.bfs_traverse(start_vertex_name, visit_callback)
+        show_value_and_clear("BFS 遍历结果：")
         print()
-        print("DFS 遍历结果：", end="")
         g.dfs_traverse(start_vertex_name, visit_callback)
-        flash_message('')
+        show_value_and_clear("DFS 遍历结果：")
+        flash_message()
 
     def topological_sort(self):
         g = self._select_graph((DirectedGraph, DirectedNetwork), ("有向图", "有向网"))
@@ -299,6 +311,7 @@ class GraphController(object):
             print(f"{v.name}: {','.join([v.name for v in adj_vs])}")
         print("该最小生成树的邻接矩阵：")
         self._print_adjacency_matrix(tree)
+        flash_message()
 
     def find_shortest_paths(self):
         g = self._select_graph((UndirectedGraph, DirectedGraph, DirectedNetwork, UndirectedNetwork),
@@ -314,12 +327,13 @@ class GraphController(object):
             flash_message(f"最短路径为 {'->'.join([v.name for v in shortest_paths[0][0]])}")
 
     def find_critical_paths(self):
-        g = self._select_graph((DirectedNetwork, UndirectedNetwork), ("有向网"))
+        g = self._select_graph((DirectedNetwork, UndirectedNetwork), ("有向网",))
         paths = g.find_critical_paths()
+        os.system("cls")
         print("关键路径有：")
         for path in paths:
             print(f"{'->'.join([v.name for v in path])}")
-
+        flash_message()
 
 def binary_tree():
     t = BinaryTreeController()
