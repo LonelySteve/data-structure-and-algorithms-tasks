@@ -156,6 +156,9 @@ class GraphController(object):
                             break
                         elif result.lower() == "n":
                             break
+                else:
+                    self.graphs[name] = cls()
+                    name_ok = True
             else:
                 name = self._name_maker(cls_name)
                 self.graphs[name] = cls()
