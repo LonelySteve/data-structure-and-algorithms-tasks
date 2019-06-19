@@ -252,7 +252,10 @@ class Graph(object):
         graphs = [CLS(v) for v in self.vertexes]
         # 排序至只有一个图时结束
         while len(graphs) != 1:
-            edge = sorted_edges.pop(0)
+            try:
+                edge = sorted_edges.pop(0)
+            except IndexError:
+                raise RuntimeError("该图/网非连通！")
             v_a = next(edge)
             v_b = next(edge)
             has_v_a_graph = next(graph for graph in graphs if v_a in graph.vertexes)
